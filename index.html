@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>fx-82AU iOS Calculator</title>
+  <title>fx-82 AU iOS Style (Direct Logic)</title>
   <style>
     :root {
       --bg: #000000;
@@ -71,9 +71,9 @@
 
     .status-bar { display: flex; justify-content: space-between; font-size: 10px; opacity: 0.6; padding: 0 4px 4px 4px; font-weight: 600; letter-spacing: 0.5px; }
     
-    .display { width: 100%; padding: 8px 12px; text-align: right; margin-bottom: 8px; background: rgba(0,0,0,0.1); border-radius: 16px; border: 1px solid var(--border); }
-    .history { font-size: 12px; opacity: 0.5; min-height: 16px; }
-    .current { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; word-break: break-all; }
+    .display { width: 100%; padding: 12px; text-align: right; margin-bottom: 8px; background: rgba(0,0,0,0.15); border-radius: 16px; border: 1px solid var(--border); }
+    .expression { font-size: 13px; opacity: 0.6; min-height: 18px; word-break: break-all; }
+    .current { font-size: 32px; font-weight: 300; letter-spacing: -0.5px; word-break: break-all; min-height: 38px; }
 
     .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 
@@ -99,11 +99,6 @@
 <body>
 
   <div class="toolbar">
-    <select id="langSelect" onchange="changeLang(this.value)">
-      <option value="en">EN</option>
-      <option value="es">ES</option>
-      <option value="fr">FR</option>
-    </select>
     <button class="tool-btn" onclick="toggleTheme()">☀️ / 🌙</button>
     <div class="palette">
       <div class="dot red" onclick="setColor('red')"></div>
@@ -118,79 +113,76 @@
 
   <div class="calc-card">
     <div class="status-bar">
-      <span id="shiftIndicator">STANDARD</span>
-      <span>fx-82AU PLUS II</span>
+      <span id="shiftIndicator">DIRECT LOGIC</span>
+      <span>fx-82AU iOS</span>
       <span id="degRad">DEG</span>
     </div>
 
     <div class="display">
-      <div class="history" id="historyText"></div>
+      <div class="expression" id="exprText"></div>
       <div class="current" id="displayText">0</div>
     </div>
     
     <div class="grid">
-      <!-- Row 1: fx-82 special function row -->
+      <!-- Row 1 -->
       <button class="shift-btn" onclick="toggleShift()" id="shiftBtn">SHIFT</button>
-      <button class="func" onclick="applyFx('frac')">a/b</button>
-      <button class="func" onclick="applyFx('sqrt')">√</button>
-      <button class="func" onclick="applyFx('sq')">x²</button>
-      <button class="func" onclick="appendOp('^')">xⁿ</button>
+      <button class="func" onclick="insertFunc('(')">(</button>
+      <button class="func" onclick="insertFunc(')')">)</button>
+      <button class="func" onclick="insertFunc('^2')">x²</button>
+      <button class="func" onclick="insertFunc('^')">xⁿ</button>
 
       <!-- Row 2 -->
-      <button class="func" onclick="applyFx('log')">log</button>
-      <button class="func" onclick="applyFx('ln')">ln</button>
-      <button class="func" onclick="applyFx('sin')" id="btnSin">sin</button>
-      <button class="func" onclick="applyFx('cos')" id="btnCos">cos</button>
-      <button class="func" onclick="applyFx('tan')" id="btnTan">tan</button>
+      <button class="func" onclick="insertFunc('log(')">log</button>
+      <button class="func" onclick="insertFunc('ln(')">ln</button>
+      <button class="func" onclick="insertFunc('sin(')" id="btnSin">sin</button>
+      <button class="func" onclick="insertFunc('cos(')" id="btnCos">cos</button>
+      <button class="func" onclick="insertFunc('tan(')" id="btnTan">tan</button>
 
       <!-- Row 3 -->
-      <button class="func" onclick="applyFx('nCr')" id="btnNcr">nCr</button>
-      <button class="func" onclick="applyFx('pol')">Pol</button>
-      <button class="func" onclick="applyFx('sto')">STO</button>
-      <button class="func" onclick="applyFx('rcl')">RCL</button>
+      <button class="func" onclick="insertFunc('√(')">√</button>
+      <button class="func" onclick="insertFunc('STO')">STO</button>
+      <button class="func" onclick="insertFunc('RCL')">RCL</button>
+      <button class="func" onclick="insertFunc('Ans')">Ans</button>
       <button class="func" onclick="toggleDeg()">D/R</button>
 
       <!-- Row 4 -->
       <button class="func del" onclick="clearAll()">AC</button>
-      <button class="func del" onclick="deleteDigit()">DEL</button>
-      <button class="func" onclick="appendConst('(')">(</button>
-      <button class="func" onclick="appendConst(')')">)</button>
-      <button class="op" onclick="appendOp('÷')">÷</button>
+      <button class="func del" onclick="deleteChar()">DEL</button>
+      <button class="func" onclick="insertFunc('%')">%</button>
+      <button class="func" onclick="insertFunc('!')">x!</button>
+      <button class="op" onclick="insertOp('/')">÷</button>
 
       <!-- Row 5 -->
-      <button onclick="appendNum('7')">7</button>
-      <button onclick="appendNum('8')">8</button>
-      <button onclick="appendNum('9')">9</button>
-      <button class="func" onclick="applyFx('fact')">x!</button>
-      <button class="op" onclick="appendOp('×')">×</button>
+      <button onclick="insertNum('7')">7</button>
+      <button onclick="insertNum('8')">8</button>
+      <button onclick="insertNum('9')">9</button>
+      <button class="func" onclick="insertFunc('π')">π</button>
+      <button class="op" onclick="insertOp('*')">×</button>
 
       <!-- Row 6 -->
-      <button onclick="appendNum('4')">4</button>
-      <button onclick="appendNum('5')">5</button>
-      <button onclick="appendNum('6')">6</button>
-      <button class="func" onclick="appendConst(Math.PI)">π</button>
-      <button class="op" onclick="appendOp('-')">-</button>
+      <button onclick="insertNum('4')">4</button>
+      <button onclick="insertNum('5')">5</button>
+      <button onclick="insertNum('6')">6</button>
+      <button class="func" onclick="insertFunc('e')">e</button>
+      <button class="op" onclick="insertOp('-')">-</button>
 
       <!-- Row 7 -->
-      <button onclick="appendNum('1')">1</button>
-      <button onclick="appendNum('2')">2</button>
-      <button onclick="appendNum('3')">3</button>
-      <button class="func" onclick="appendConst(2.718281828)">e</button>
-      <button class="op" onclick="appendOp('+')">+</button>
+      <button onclick="insertNum('1')">1</button>
+      <button onclick="insertNum('2')">2</button>
+      <button onclick="insertNum('3')">3</button>
+      <button class="func" onclick="insertFunc('*10^')">×10ⁿ</button>
+      <button class="op" onclick="insertOp('+')">+</button>
 
       <!-- Row 8 -->
-      <button onclick="appendNum('0')">0</button>
-      <button onclick="appendNum('.')">.</button>
-      <button class="func" onclick="appendExp()">×10ⁿ</button>
-      <button class="func" onclick="applyFx('ans')">Ans</button>
-      <button class="op" onclick="calculate()">=</button>
+      <button onclick="insertNum('0')">0</button>
+      <button onclick="insertNum('.')">.</button>
+      <button class="func" onclick="toggleSign()">±</button>
+      <button class="op" style="grid-column: span 2;" onclick="evaluateDirect()">=</button>
     </div>
   </div>
 
   <script>
-    let currentInput = "0";
-    let previousInput = "";
-    let operator = null;
+    let expr = "";
     let isShift = false;
     let isDeg = true;
     let lastAns = 0;
@@ -205,15 +197,12 @@
       document.documentElement.setAttribute('data-color', color);
     }
 
-    function changeLang(lang) {}
-
     function toggleShift() {
       isShift = !isShift;
-      document.getElementById('shiftIndicator').innerText = isShift ? "SHIFT" : "STANDARD";
-      document.getElementById('btnSin').innerText = isShift ? "sin⁻¹" : "sin";
-      document.getElementById('btnCos').innerText = isShift ? "cos⁻¹" : "cos";
-      document.getElementById('btnTan').innerText = isShift ? "tan⁻¹" : "tan";
-      document.getElementById('btnNcr').innerText = isShift ? "nPr" : "nCr";
+      document.getElementById('shiftIndicator').innerText = isShift ? "SHIFT" : "DIRECT LOGIC";
+      document.getElementById('btnSin').innerText = isShift ? "asin" : "sin";
+      document.getElementById('btnCos').innerText = isShift ? "acos" : "cos";
+      document.getElementById('btnTan').innerText = isShift ? "atan" : "tan";
     }
 
     function toggleDeg() {
@@ -222,107 +211,101 @@
     }
 
     function updateDisplay() {
-      document.getElementById('displayText').innerText = currentInput;
-      document.getElementById('historyText').innerText = previousInput + (operator ? " " + operator : "");
+      document.getElementById('displayText').innerText = expr === "" ? "0" : expr;
     }
 
-    function appendNum(num) {
-      if (currentInput === "0" && num !== ".") currentInput = num;
-      else if (num === "." && currentInput.includes(".")) return;
-      else currentInput += num;
+    function insertNum(num) {
+      expr += num;
       updateDisplay();
     }
 
-    function appendConst(val) {
-      currentInput = val.toString();
+    function insertOp(op) {
+      expr += op;
       updateDisplay();
     }
 
-    function appendExp() {
-      if (!currentInput.includes("e")) {
-        currentInput += "e+";
-        updateDisplay();
-      }
-    }
+    function insertFunc(fn) {
+      if (fn === 'sin(' && isShift) fn = 'asin(';
+      if (fn === 'cos(' && isShift) fn = 'acos(';
+      if (fn === 'tan(' && isShift) fn = 'atan(';
 
-    function appendOp(op) {
-      if (operator && currentInput !== "") calculate();
-      previousInput = currentInput;
-      operator = op;
-      currentInput = "";
-      updateDisplay();
-    }
+      if (fn === 'STO') { memoryVal = parseFloat(expr) || 0; return; }
+      if (fn === 'RCL') { expr += memoryVal.toString(); updateDisplay(); return; }
+      if (fn === 'Ans') { expr += lastAns.toString(); updateDisplay(); return; }
 
-    function applyFx(type) {
-      let val = parseFloat(currentInput);
-
-      if (type === 'sin') {
-        let rad = isDeg ? val * (Math.PI / 180) : val;
-        currentInput = isShift ? (Math.asin(val) * (isDeg ? 180/Math.PI : 1)).toString() : Math.sin(rad).toString();
-      } else if (type === 'cos') {
-        let rad = isDeg ? val * (Math.PI / 180) : val;
-        currentInput = isShift ? (Math.acos(val) * (isDeg ? 180/Math.PI : 1)).toString() : Math.cos(rad).toString();
-      } else if (type === 'tan') {
-        let rad = isDeg ? val * (Math.PI / 180) : val;
-        currentInput = isShift ? (Math.atan(val) * (isDeg ? 180/Math.PI : 1)).toString() : Math.tan(rad).toString();
-      } else if (type === 'sqrt') {
-        currentInput = Math.sqrt(val).toString();
-      } else if (type === 'sq') {
-        currentInput = Math.pow(val, 2).toString();
-      } else if (type === 'log') {
-        currentInput = Math.log10(val).toString();
-      } else if (type === 'ln') {
-        currentInput = Math.log(val).toString();
-      } else if (type === 'fact') {
-        let f = 1; for(let i=1; i<=val; i++) f*=i; currentInput = f.toString();
-      } else if (type === 'ans') {
-        currentInput = lastAns.toString();
-      } else if (type === 'sto') {
-        memoryVal = val;
-      } else if (type === 'rcl') {
-        currentInput = memoryVal.toString();
-      } else if (type === 'frac') {
-        currentInput = (val / 100).toString(); // Quick percentage/fraction approximation
-      }
-
+      expr += fn;
       if (isShift) toggleShift();
       updateDisplay();
     }
 
-    function calculate() {
-      if (!operator || currentInput === "") return;
-      let prev = parseFloat(previousInput);
-      let curr = parseFloat(currentInput);
-      let result = 0;
-
-      switch(operator) {
-        case '+': result = prev + curr; break;
-        case '-': result = prev - curr; break;
-        case '×': result = prev * curr; break;
-        case '÷': result = curr !== 0 ? prev / curr : "Error"; break;
-        case '^': result = Math.pow(prev, curr); break;
-      }
-
-      lastAns = result;
-      currentInput = result.toString();
-      previousInput = "";
-      operator = null;
+    function toggleSign() {
+      if (expr.startsWith('-')) expr = expr.slice(1);
+      else expr = '-' + expr;
       updateDisplay();
     }
 
     function clearAll() {
-      currentInput = "0";
-      previousInput = "";
-      operator = null;
+      expr = "";
+      document.getElementById('exprText').innerText = "";
       updateDisplay();
     }
 
-    function deleteDigit() {
-      currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : "0";
+    function deleteChar() {
+      expr = expr.slice(0, -1);
       updateDisplay();
     }
 
-    updateDisplay();
+    function factorial(n) {
+      if (n < 0) return NaN;
+      if (n === 0 || n === 1) return 1;
+      let res = 1; for (let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    function evaluateDirect() {
+      if (!expr) return;
+      document.getElementById('exprText').innerText = expr;
+
+      try {
+        let parseExpr = expr
+          .replace(/π/g, Math.PI)
+          .replace(/e/g, Math.E)
+          .replace(/√\(/g, 'Math.sqrt(')
+          .replace(/log\(/g, 'Math.log10(')
+          .replace(/ln\(/g, 'Math.log(')
+          .replace(/\^/g, '**');
+
+        // Trigonometry handling for DEG/RAD
+        if (isDeg) {
+          parseExpr = parseExpr
+            .replace(/sin\(([^)]+)\)/g, (m, p) => `Math.sin((${p}) * Math.PI / 180)`)
+            .replace(/cos\(([^)]+)\)/g, (m, p) => `Math.cos((${p}) * Math.PI / 180)`)
+            .replace(/tan\(([^)]+)\)/g, (m, p) => `Math.tan((${p}) * Math.PI / 180)`)
+            .replace(/asin\(([^)]+)\)/g, (m, p) => `(Math.asin(${p}) * 180 / Math.PI)`)
+            .replace(/acos\(([^)]+)\)/g, (m, p) => `(Math.acos(${p}) * 180 / Math.PI)`)
+            .replace(/atan\(([^)]+)\)/g, (m, p) => `(Math.atan(${p}) * 180 / Math.PI)`);
+        } else {
+          parseExpr = parseExpr
+            .replace(/sin\(/g, 'Math.sin(')
+            .replace(/cos\(/g, 'Math.cos(')
+            .replace(/tan\(/g, 'Math.tan(')
+            .replace(/asin\(/g, 'Math.asin(')
+            .replace(/acos\(/g, 'Math.acos(')
+            .replace(/atan\(/g, 'Math.atan(');
+        }
+
+        // Factorial handling
+        parseExpr = parseExpr.replace(/(\d+)!/g, (m, p) => factorial(parseInt(p)));
+
+        let result = Function('"use strict"; return (' + parseExpr + ')')();
+        lastAns = result;
+        expr = result.toString();
+        updateDisplay();
+      } catch (err) {
+        document.getElementById('displayText').innerText = "Error";
+        expr = "";
+      }
+    }
   </script>
 </body>
 </html>
