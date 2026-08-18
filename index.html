@@ -3,31 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimalist Calculator</title>
+  <title>iOS Scientific Calculator</title>
   <style>
     :root {
-      --bg: #191919;
-      --card-bg: #252525;
-      --btn-bg: #333333;
+      --bg: #000000;
+      --card-bg: rgba(25, 25, 25, 0.75);
+      --btn-num: #333333;
+      --btn-func: #a5a5a5;
+      --text-func: #000000;
       --text: #ffffff;
-      --border: #383838;
+      --border: rgba(255, 255, 255, 0.1);
       
-      --color-red: #ff4d4d;
-      --color-orange: #ff944d;
-      --color-yellow: #ffd11a;
-      --color-green: #2ecc71;
-      --color-blue: #3498db;
-      --color-purple: #9b59b6;
-      --color-pink: #ff66a3;
-      --accent: var(--color-blue);
+      --color-red: #ff3b30;
+      --color-orange: #ff9500;
+      --color-yellow: #ffcc00;
+      --color-green: #34c759;
+      --color-blue: #007aff;
+      --color-purple: #af52de;
+      --color-pink: #ff2d55;
+      --accent: var(--color-orange);
     }
 
     [data-theme="light"] {
-      --bg: #f7f7f9;
-      --card-bg: #ffffff;
-      --btn-bg: #f0f0f3;
-      --text: #191919;
-      --border: #e0e0e0;
+      --bg: #f2f2f7;
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --btn-num: #ffffff;
+      --btn-func: #e5e5ea;
+      --text-func: #000000;
+      --text: #000000;
+      --border: rgba(0, 0, 0, 0.1);
     }
 
     [data-color="red"] { --accent: var(--color-red); }
@@ -38,11 +42,11 @@
     [data-color="purple"] { --accent: var(--color-purple); }
     [data-color="pink"] { --accent: var(--color-pink); }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; transition: all 0.3s ease; }
     
     .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
-    select, button { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+    select, button.tool-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 12px; font-size: 11px; cursor: pointer; backdrop-filter: blur(10px); }
     
     .palette { display: flex; gap: 4px; }
     .dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
@@ -54,17 +58,44 @@
     .dot.purple { background: var(--color-purple); }
     .dot.pink { background: var(--color-pink); }
 
-    .calc-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; width: 100%; max-width: 260px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    
-    .display { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: right; margin-bottom: 12px; overflow-x: auto; }
-    .history { font-size: 11px; opacity: 0.6; min-height: 14px; }
-    .current { font-size: 24px; font-weight: bold; }
+    .calc-card { 
+      background: var(--card-bg); 
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border); 
+      border-radius: 32px; 
+      padding: 16px; 
+      width: 100%; 
+      max-width: 320px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      transition: max-width 0.3s ease;
+    }
+
+    .calc-card.sci-mode { max-width: 420px; }
+
+    .display { width: 100%; padding: 8px 12px; text-align: right; margin-bottom: 8px; overflow-x: auto; }
+    .history { font-size: 13px; opacity: 0.5; min-height: 16px; }
+    .current { font-size: 36px; font-weight: 300; letter-spacing: -0.5px; }
 
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .grid button { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; transition: all 0.1s ease; }
-    .grid button:hover { border-color: var(--accent); }
-    .grid button.op { color: var(--accent); }
-    .grid button.action { background: var(--accent); color: white; border: none; }
+    .calc-card.sci-mode .grid { grid-template-columns: repeat(5, 1fr); }
+
+    .grid button { 
+      background: var(--btn-num); 
+      color: var(--text); 
+      border: none; 
+      height: 48px; 
+      border-radius: 24px; 
+      font-size: 16px; 
+      font-weight: 400; 
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+    }
+    .grid button:active { opacity: 0.7; transform: scale(0.96); }
+    
+    .grid button.func { background: var(--btn-func); color: var(--text-func); }
+    .grid button.op { background: var(--accent); color: #ffffff; font-size: 18px; }
+    .grid button.sci { background: rgba(120, 120, 128, 0.3); color: var(--text); font-size: 12px; }
   </style>
 </head>
 <body>
@@ -75,7 +106,8 @@
       <option value="es">ES</option>
       <option value="fr">FR</option>
     </select>
-    <button onclick="toggleTheme()">☀️ / 🌙</button>
+    <button class="tool-btn" onclick="toggleTheme()">☀️ / 🌙</button>
+    <button class="tool-btn" onclick="toggleSci()" id="sciBtn">Scientific Mode</button>
     <div class="palette">
       <div class="dot red" onclick="setColor('red')"></div>
       <div class="dot orange" onclick="setColor('orange')"></div>
@@ -87,36 +119,14 @@
     </div>
   </div>
 
-  <div class="calc-card">
+  <div class="calc-card" id="calcCard">
     <div class="display">
       <div class="history" id="historyText"></div>
       <div class="current" id="displayText">0</div>
     </div>
     
-    <div class="grid">
-      <button onclick="clearCalc()" id="clearBtn">C</button>
-      <button onclick="deleteDigit()" id="delBtn">DEL</button>
-      <button class="op" onclick="appendOp('%')">%</button>
-      <button class="op" onclick="appendOp('÷')">÷</button>
-
-      <button onclick="appendNum('7')">7</button>
-      <button onclick="appendNum('8')">8</button>
-      <button onclick="appendNum('9')">9</button>
-      <button class="op" onclick="appendOp('×')">×</button>
-
-      <button onclick="appendNum('4')">4</button>
-      <button onclick="appendNum('5')">5</button>
-      <button onclick="appendNum('6')">6</button>
-      <button class="op" onclick="appendOp('-')">-</button>
-
-      <button onclick="appendNum('1')">1</button>
-      <button onclick="appendNum('2')">2</button>
-      <button onclick="appendNum('3')">3</button>
-      <button class="op" onclick="appendOp('+')">+</button>
-
-      <button onclick="appendNum('0')" style="grid-column: span 2;">0</button>
-      <button onclick="appendNum('.')">.</button>
-      <button class="action" onclick="calculate()">=</button>
+    <div class="grid" id="calcGrid">
+      <!-- Standard Layout Default -->
     </div>
   </div>
 
@@ -124,6 +134,14 @@
     let currentInput = "0";
     let previousInput = "";
     let operator = null;
+    let isSci = false;
+    let currentLang = "en";
+
+    const i18n = {
+      en: { sciBtn: "Sci Mode", stdBtn: "Basic Mode" },
+      es: { sciBtn: "Modo Cien.", stdBtn: "Modo Básico" },
+      fr: { sciBtn: "Mode Sci.", stdBtn: "Mode Basique" }
+    };
 
     function toggleTheme() {
       const html = document.documentElement;
@@ -135,8 +153,15 @@
     }
 
     function changeLang(lang) {
-      const delLabel = { en: "DEL", es: "BOR", fr: "EFF" };
-      document.getElementById('delBtn').innerText = delLabel[lang];
+      currentLang = lang;
+      document.getElementById('sciBtn').innerText = isSci ? i18n[lang].stdBtn : i18n[lang].sciBtn;
+    }
+
+    function toggleSci() {
+      isSci = !isSci;
+      document.getElementById('calcCard').classList.toggle('sci-mode', isSci);
+      document.getElementById('sciBtn').innerText = isSci ? i18n[currentLang].stdBtn : i18n[currentLang].sciBtn;
+      renderGrid();
     }
 
     function updateDisplay() {
@@ -159,6 +184,27 @@
       updateDisplay();
     }
 
+    function appendConst(val) {
+      currentInput = val.toString();
+      updateDisplay();
+    }
+
+    function applyFunc(funcName) {
+      let val = parseFloat(currentInput);
+      if (isNaN(val)) return;
+
+      switch(funcName) {
+        case 'sin': currentInput = Math.sin(val).toString(); break;
+        case 'cos': currentInput = Math.cos(val).toString(); break;
+        case 'tan': currentInput = Math.tan(val).toString(); break;
+        case 'ln': currentInput = Math.log(val).toString(); break;
+        case 'log': currentInput = Math.log10(val).toString(); break;
+        case 'sqrt': currentInput = Math.sqrt(val).toString(); break;
+        case 'sq': currentInput = Math.pow(val, 2).toString(); break;
+      }
+      updateDisplay();
+    }
+
     function calculate() {
       if (!operator || currentInput === "") return;
       let prev = parseFloat(previousInput);
@@ -170,7 +216,7 @@
         case '-': result = prev - curr; break;
         case '×': result = prev * curr; break;
         case '÷': result = curr !== 0 ? prev / curr : "Error"; break;
-        case '%': result = prev % curr; break;
+        case '^': result = Math.pow(prev, curr); break;
       }
 
       currentInput = result.toString();
@@ -186,14 +232,82 @@
       updateDisplay();
     }
 
-    function deleteDigit() {
-      if (currentInput.length > 1) {
-        currentInput = currentInput.slice(0, -1);
-      } else {
-        currentInput = "0";
+    function toggleSign() {
+      if (currentInput !== "0") {
+        currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
+        updateDisplay();
       }
-      updateDisplay();
     }
+
+    function renderGrid() {
+      const grid = document.getElementById('calcGrid');
+      
+      if (!isSci) {
+        grid.innerHTML = `
+          <button class="func" onclick="clearCalc()">AC</button>
+          <button class="func" onclick="toggleSign()">±</button>
+          <button class="func" onclick="applyFunc('sq')">x²</button>
+          <button class="op" onclick="appendOp('÷')">÷</button>
+
+          <button onclick="appendNum('7')">7</button>
+          <button onclick="appendNum('8')">8</button>
+          <button onclick="appendNum('9')">9</button>
+          <button class="op" onclick="appendOp('×')">×</button>
+
+          <button onclick="appendNum('4')">4</button>
+          <button onclick="appendNum('5')">5</button>
+          <button onclick="appendNum('6')">6</button>
+          <button class="op" onclick="appendOp('-')">-</button>
+
+          <button onclick="appendNum('1')">1</button>
+          <button onclick="appendNum('2')">2</button>
+          <button onclick="appendNum('3')">3</button>
+          <button class="op" onclick="appendOp('+')">+</button>
+
+          <button onclick="appendNum('0')" style="grid-column: span 2; border-radius: 24px; text-align: left; padding-left: 18px;">0</button>
+          <button onclick="appendNum('.')">.</button>
+          <button class="op" onclick="calculate()">=</button>
+        `;
+      } else {
+        grid.innerHTML = `
+          <button class="sci" onclick="applyFunc('sin')">sin</button>
+          <button class="sci" onclick="applyFunc('cos')">cos</button>
+          <button class="sci" onclick="applyFunc('tan')">tan</button>
+          <button class="func" onclick="clearCalc()">AC</button>
+          <button class="op" onclick="appendOp('÷')">÷</button>
+
+          <button class="sci" onclick="applyFunc('ln')">ln</button>
+          <button class="sci" onclick="applyFunc('log')">log</button>
+          <button class="sci" onclick="applyFunc('sqrt')">√</button>
+          <button class="sci" onclick="appendOp('^')">xʸ</button>
+          <button class="op" onclick="appendOp('×')">×</button>
+
+          <button class="sci" title="Speed of light (c)" onclick="appendConst(299792458)">c</button>
+          <button onclick="appendNum('7')">7</button>
+          <button onclick="appendNum('8')">8</button>
+          <button onclick="appendNum('9')">9</button>
+          <button class="op" onclick="appendOp('-')">-</button>
+
+          <button class="sci" title="Avogadro's Number (Na)" onclick="appendConst(6.022e23)">N<sub>a</sub></button>
+          <button onclick="appendNum('4')">4</button>
+          <button onclick="appendNum('5')">5</button>
+          <button onclick="appendNum('6')">6</button>
+          <button class="op" onclick="appendOp('+')">+</button>
+
+          <button class="sci" title="Planck's constant (h)" onclick="appendConst(6.626e-34)">h</button>
+          <button onclick="appendNum('1')">1</button>
+          <button onclick="appendNum('2')">2</button>
+          <button onclick="appendNum('3')">3</button>
+          <button class="op" style="grid-row: span 2; height: 104px;" onclick="calculate()">=</button>
+
+          <button class="sci" title="Pi" onclick="appendConst(Math.PI)">π</button>
+          <button onclick="appendNum('0')" style="grid-column: span 2; border-radius: 24px; text-align: left; padding-left: 18px;">0</button>
+          <button onclick="appendNum('.')">.</button>
+        `;
+      }
+    }
+
+    renderGrid();
   </script>
 </body>
 </html>
