@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>fx-82AU PLUS II 2nd Edition (Organized Sections)</title>
+  <title>fx-82AU PLUS II 2nd Edition (iOS Style + Keyboard & Multi-Lang)</title>
   <style>
     :root {
       --bg: #000000;
@@ -49,19 +49,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
     
-    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
-    button.tool-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; backdrop-filter: blur(10px); }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; justify-content: center; width: 100%; max-width: 370px; }
+    button.tool-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; cursor: pointer; backdrop-filter: blur(10px); flex: 1; }
     
-    .palette { display: flex; gap: 4px; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-    .dot.red { background: var(--color-red); }
-    .dot.orange { background: var(--color-orange); }
-    .dot.yellow { background: var(--color-yellow); }
-    .dot.green { background: var(--color-green); }
-    .dot.blue { background: var(--color-blue); }
-    .dot.purple { background: var(--color-purple); }
-    .dot.pink { background: var(--color-pink); }
-
     .calc-card { 
       background: var(--card-bg); 
       backdrop-filter: blur(25px);
@@ -72,7 +62,39 @@
       width: 100%; 
       max-width: 370px; 
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      position: relative;
     }
+
+    /* Unfolding Panels */
+    .panel {
+      display: none;
+      background: rgba(18, 18, 20, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .panel.open { display: block; }
+    .panel h4 { margin-bottom: 8px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .setting-row select { background: var(--btn-top); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 8px; }
+
+    .palette { display: flex; gap: 6px; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+    .dot.red { background: var(--color-red); }
+    .dot.orange { background: var(--color-orange); }
+    .dot.yellow { background: var(--color-yellow); }
+    .dot.green { background: var(--color-green); }
+    .dot.blue { background: var(--color-blue); }
+    .dot.purple { background: var(--color-purple); }
+    .dot.pink { background: var(--color-pink); }
+
+    .instruction-item { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px; }
+    .instruction-item strong { color: var(--btn-shift); }
 
     .status-bar { display: flex; justify-content: space-between; font-size: 10px; opacity: 0.6; padding: 0 4px 6px 4px; font-weight: 600; letter-spacing: 0.5px; }
     
@@ -80,12 +102,10 @@
     .expression { font-size: 12px; opacity: 0.5; min-height: 16px; word-break: break-all; }
     .current { font-size: 28px; font-weight: 300; letter-spacing: -0.5px; word-break: break-all; min-height: 36px; }
 
-    /* Sectional Layout Styles */
     .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.4; margin: 8px 0 4px 2px; }
 
     .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
 
     button { 
       background: var(--btn-sci); 
@@ -112,19 +132,51 @@
 <body>
 
   <div class="toolbar">
-    <button class="tool-btn" onclick="toggleTheme()">☀️ / 🌙</button>
-    <div class="palette">
-      <div class="dot red" onclick="setColor('red')"></div>
-      <div class="dot orange" onclick="setColor('orange')"></div>
-      <div class="dot yellow" onclick="setColor('yellow')"></div>
-      <div class="dot green" onclick="setColor('green')"></div>
-      <div class="dot blue" onclick="setColor('blue')"></div>
-      <div class="dot purple" onclick="setColor('purple')"></div>
-      <div class="dot pink" onclick="setColor('pink')"></div>
-    </div>
+    <button class="tool-btn" onclick="togglePanel('settingsPanel')">⚙️ <span id="lblSettings">Settings</span></button>
+    <button class="tool-btn" onclick="togglePanel('instructionsPanel')">📖 <span id="lblInstructions">Help</span></button>
   </div>
 
   <div class="calc-card">
+    
+    <!-- Foldout Settings Panel -->
+    <div class="panel" id="settingsPanel">
+      <h4 id="hdrSettings">Settings</h4>
+      <div class="setting-row">
+        <span id="lblLanguage">Language</span>
+        <select id="langSelect" onchange="changeLanguage(this.value)">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="zh">中文</option>
+          <option value="ko">한국어</option>
+          <option value="ja">日本語</option>
+          <option value="fa">فارسی</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span id="lblTheme">Theme</span>
+        <button class="tool-btn" style="flex:none;" onclick="toggleTheme()">☀️ / 🌙</button>
+      </div>
+      <div class="setting-row">
+        <span id="lblAccent">Accent Color</span>
+        <div class="palette">
+          <div class="dot red" onclick="setColor('red')"></div>
+          <div class="dot orange" onclick="setColor('orange')"></div>
+          <div class="dot yellow" onclick="setColor('yellow')"></div>
+          <div class="dot green" onclick="setColor('green')"></div>
+          <div class="dot blue" onclick="setColor('blue')"></div>
+          <div class="dot purple" onclick="setColor('purple')"></div>
+          <div class="dot pink" onclick="setColor('pink')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Foldout Instructions Panel -->
+    <div class="panel" id="instructionsPanel">
+      <h4 id="hdrInstructions">Button Instructions & Keyboard Mapping</h4>
+      <div id="instructionsContent"></div>
+    </div>
+
     <div class="status-bar">
       <span id="shiftIndicator">DIRECT</span>
       <span>fx-82AU PLUS II</span>
@@ -137,7 +189,7 @@
     </div>
     
     <!-- Section 1: System Control -->
-    <div class="section-title">System & Modes</div>
+    <div class="section-title" id="secSys">System & Modes</div>
     <div class="grid-4">
       <button class="btn-shift" onclick="toggleShift()" id="shiftBtn">SHIFT</button>
       <button class="btn-alpha" onclick="toggleAlpha()">ALPHA</button>
@@ -146,36 +198,31 @@
     </div>
 
     <!-- Section 2: Scientific Functions -->
-    <div class="section-title">Scientific Functions</div>
+    <div class="section-title" id="secSci">Scientific Functions</div>
     <div class="grid-5">
-      <!-- Row 1 -->
       <button onclick="insertFunc('Abs(')">Abs</button>
       <button onclick="insertFunc('^3')">x³</button>
       <button style="grid-column: span 2; opacity: 0.3;">D-PAD</button>
       <button onclick="insertFunc('^-1')">x⁻¹</button>
 
-      <!-- Row 2 -->
       <button onclick="insertFunc('(')">a/b</button>
       <button onclick="insertFunc('√(')">√</button>
       <button onclick="insertFunc('^2')">x²</button>
       <button onclick="insertFunc('^')">xⁿ</button>
       <button onclick="insertFunc('log(')">log</button>
 
-      <!-- Row 3 -->
       <button onclick="insertFunc('ln(')">ln</button>
       <button onclick="toggleSign()">(-)</button>
       <button onclick="insertFunc('°')">°' "</button>
       <button onclick="insertFunc('hyp')">hyp</button>
       <button onclick="insertFunc('sin(')" id="btnSin">sin</button>
 
-      <!-- Row 4 -->
       <button onclick="insertFunc('cos(')" id="btnCos">cos</button>
       <button onclick="insertFunc('tan(')" id="btnTan">tan</button>
       <button onclick="insertFunc('RCL')">RCL</button>
       <button onclick="insertFunc('ENG')">ENG</button>
       <button onclick="insertFunc('(')">(</button>
 
-      <!-- Row 5 -->
       <button onclick="insertFunc(')')">)</button>
       <button onclick="insertFunc('S⇔D')">S⇔D</button>
       <button onclick="insertFunc('M+')">M+</button>
@@ -184,7 +231,7 @@
     </div>
 
     <!-- Section 3: Editing & Numeric Keys -->
-    <div class="section-title">Numpad & Basic Operations</div>
+    <div class="section-title" id="secNum">Numpad & Basic Operations</div>
     <div class="grid-4">
       <button class="btn-del" onclick="deleteChar()">DEL</button>
       <button class="btn-ac" onclick="clearAll()">AC</button>
@@ -219,6 +266,180 @@
     let isDeg = true;
     let lastAns = 0;
     let memoryVal = 0;
+    let currentLang = 'en';
+
+    const translations = {
+      en: {
+        settings: "Settings", help: "Help", language: "Language", theme: "Theme", accent: "Accent Color",
+        hdrInstructions: "Button Instructions & Keyboard Mapping",
+        sysTitle: "System & Modes", sciTitle: "Scientific Functions", numTitle: "Numpad & Basic Operations",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "Types digits and decimal points." },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "Basic mathematical operators." },
+          { btn: "=", key: "Enter", desc: "Evaluates the current expression directly." },
+          { btn: "DEL", key: "Backspace", desc: "Deletes the last typed character." },
+          { btn: "AC / ON", key: "Escape", desc: "Clears the display and resets current expression." },
+          { btn: "SHIFT", key: "Shift", desc: "Toggles secondary inverse functions (asin, acos, atan)." },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "Trigonometric functions (or inverse when SHIFT active)." },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "Square root (r), square (q), and exponent power (^)." },
+          { btn: "log, ln", key: "l, n", desc: "Base-10 log (l) and natural logarithm (n)." },
+          { btn: "(, )", key: "(, )", desc: "Open and close parentheses for custom order of operation." },
+          { btn: "π, e", key: "p, e", desc: "Inserts mathematical constants Pi (3.14159...) and Euler's e." },
+          { btn: "Ans", key: "a", desc: "Recalls the result of the previously evaluated answer." },
+          { btn: "MODE", key: "m", desc: "Toggles calculation angle unit between Degrees and Radians." }
+        ]
+      },
+      es: {
+        settings: "Ajustes", help: "Ayuda", language: "Idioma", theme: "Tema", accent: "Color de Acento",
+        hdrInstructions: "Instrucciones de Botones y Teclado",
+        sysTitle: "Sistema y Modos", sciTitle: "Funciones Científicas", numTitle: "Teclado Numérico",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "Escribe dígitos y puntos decimales." },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "Operadores matemáticos básicos." },
+          { btn: "=", key: "Enter", desc: "Evalúa la expresión actual." },
+          { btn: "DEL", key: "Retroceso", desc: "Elimina el último carácter escrito." },
+          { btn: "AC / ON", key: "Escape", desc: "Limpia la pantalla." },
+          { btn: "SHIFT", key: "Shift", desc: "Activa funciones inversas (asin, acos, atan)." },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "Funciones trigonométricas." },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "Raíz cuadrada (r), cuadrado (q) y potencia (^)." },
+          { btn: "log, ln", key: "l, n", desc: "Logaritmo base-10 (l) y natural (n)." },
+          { btn: "(, )", key: "(, )", desc: "Abre y cierra paréntesis." },
+          { btn: "π, e", key: "p, e", desc: "Inserta constantes Pi y Euler e." },
+          { btn: "Ans", key: "a", desc: "Recupera la última respuesta." },
+          { btn: "MODE", key: "m", desc: "Cambia entre Grados (DEG) y Radianes (RAD)." }
+        ]
+      },
+      fr: {
+        settings: "Réglages", help: "Aide", language: "Langue", theme: "Thème", accent: "Couleur d'accent",
+        hdrInstructions: "Instructions des Boutons et Raccourcis",
+        sysTitle: "Système et Modes", sciTitle: "Fonctions Scientifiques", numTitle: "Pave Numérique",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "Saisit les chiffres et la virgule." },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "Opérateurs mathématiques de base." },
+          { btn: "=", key: "Entrée", desc: "Évalue l'expression actuelle." },
+          { btn: "DEL", key: "Retour arrière", desc: "Efface le dernier caractère." },
+          { btn: "AC / ON", key: "Échap", desc: "Efface tout l'affichage." },
+          { btn: "SHIFT", key: "Maj", desc: "Bascule vers les fonctions inverses." },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "Fonctions trigonométriques." },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "Racine carrée (r), carré (q) et puissance (^)." },
+          { btn: "log, ln", key: "l, n", desc: "Logarithme décimal (l) et naturel (n)." },
+          { btn: "(, )", key: "(, )", desc: "Parenthèses ouvrantes et fermantes." },
+          { btn: "π, e", key: "p, e", desc: "Insère Pi ou la constante e." },
+          { btn: "Ans", key: "a", desc: "Rappelle le dernier résultat." },
+          { btn: "MODE", key: "m", desc: "Bascule entre Degrés (DEG) et Radians (RAD)." }
+        ]
+      },
+      zh: {
+        settings: "设置", help: "帮助", language: "语言", theme: "主题", accent: "主题颜色",
+        hdrInstructions: "按键说明与键盘映射",
+        sysTitle: "系统与模式", sciTitle: "科学函数", numTitle: "数字与基本运算",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "输入数字和小数点。" },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "基本算术运算符。" },
+          { btn: "=", key: "Enter (回车)", desc: "计算当前表达式的结果。" },
+          { btn: "DEL", key: "Backspace (退格)", desc: "删除上一个输入的字符。" },
+          { btn: "AC / ON", key: "Escape (Esc)", desc: "清空屏幕。" },
+          { btn: "SHIFT", key: "Shift", desc: "切换反三角函数 (asin, acos, atan)。" },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "三角函数。" },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "平方根 (r)、平方 (q) 及次方 (^)。" },
+          { btn: "log, ln", key: "l, n", desc: "常用对数 (l) 和自然对数 (n)。" },
+          { btn: "(, )", key: "(, )", desc: "括号用于改变运算优先级。" },
+          { btn: "π, e", key: "p, e", desc: "插入圆周率 Pi 或自然常数 e。" },
+          { btn: "Ans", key: "a", desc: "调出上一次计算的结果。" },
+          { btn: "MODE", key: "m", desc: "在角度 (DEG) 和弧度 (RAD) 之间切换。" }
+        ]
+      },
+      ko: {
+        settings: "설정", help: "도움말", language: "언어", theme: "테마", accent: "포인트 색상",
+        hdrInstructions: "버튼 설명 및 키보드 매핑",
+        sysTitle: "시스템 및 모드", sciTitle: "공학용 함수", numTitle: "숫자 및 기본 연산",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "숫자와 소수점을 입력합니다." },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "기본 사칙연산자입니다." },
+          { btn: "=", key: "Enter", desc: "수식을 계산합니다." },
+          { btn: "DEL", key: "Backspace", desc: "마지막 문자를 지웁니다." },
+          { btn: "AC / ON", key: "Escape", desc: "화면을 초기화합니다." },
+          { btn: "SHIFT", key: "Shift", desc: "역삼각함수 모드로 전환합니다." },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "삼각함수입니다." },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "제곱근(r), 제곱(q), 거듭제곱(^)입니다." },
+          { btn: "log, ln", key: "l, n", desc: "상용로그(l) 및 자연로그(n)입니다." },
+          { btn: "(, )", key: "(, )", desc: "괄호를 입력합니다." },
+          { btn: "π, e", key: "p, e", desc: "파이(π) 및 오일러 수(e)를 입력합니다." },
+          { btn: "Ans", key: "a", desc: "이전 계산 결과를 불러옵니다." },
+          { btn: "MODE", key: "m", desc: "도(DEG)와 라디안(RAD)을 전환합니다." }
+        ]
+      },
+      ja: {
+        settings: "設定", help: "ヘルプ", language: "言語", theme: "テーマ", accent: "アクセントカラー",
+        hdrInstructions: "ボタン説明とキーボード割り当て",
+        sysTitle: "システム & モード", sciTitle: "科学関数", numTitle: "数字 & 基本演算",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "数字と小数点に入力します。" },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "基本演算子。" },
+          { btn: "=", key: "Enter", desc: "式を計算します。" },
+          { btn: "DEL", key: "Backspace", desc: "1文字削除します。" },
+          { btn: "AC / ON", key: "Escape", desc: "画面をクリアします。" },
+          { btn: "SHIFT", key: "Shift", desc: "逆三角関数に切り替えます。" },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "三角関数。" },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "平方根 (r)、二乗 (q)、累乗 (^)。" },
+          { btn: "log, ln", key: "l, n", desc: "常用対数 (l) と自然対数 (n)。" },
+          { btn: "(, )", key: "(, )", desc: "かっこを入力します。" },
+          { btn: "π, e", key: "p, e", desc: "円周率πおよびネイピア数eを入力。" },
+          { btn: "Ans", key: "a", desc: "前回の計算結果を呼び出します。" },
+          { btn: "MODE", key: "m", desc: "度 (DEG) とラジアン (RAD) を切り替えます。" }
+        ]
+      },
+      fa: {
+        settings: "تنظیمات", help: "راهنما", language: "زبان", theme: "پوسته", accent: "رنگ اصلی",
+        hdrInstructions: "راهنمای دکمه‌ها و کلیدهای کیبورد",
+        sysTitle: "سیستم و حالت‌ها", sciTitle: "توابع علمی", numTitle: "صفحه کلید عددی",
+        instructions: [
+          { btn: "0-9, .", key: "0-9, .", desc: "وارد کردن ارقام و نقطه اعشار." },
+          { btn: "+, -, ×, ÷", key: "+, -, *, /", desc: "عملگرهای پایه ریاضی." },
+          { btn: "=", key: "Enter", desc: "محاسبه مستقیم عبارت." },
+          { btn: "DEL", key: "Backspace", desc: "پاک کردن آخرین کاراکتر." },
+          { btn: "AC / ON", key: "Escape", desc: "پاک کردن کامل صفحه." },
+          { btn: "SHIFT", key: "Shift", desc: "فعال‌سازی توابع معکوس (asin, acos, atan)." },
+          { btn: "sin, cos, tan", key: "s, c, t", desc: "توابع مثلثاتی." },
+          { btn: "√, x², xⁿ", key: "r, q, ^", desc: "جذر (r)، توان دو (q) و توان دلخواه (^)." },
+          { btn: "log, ln", key: "l, n", desc: "لگاریتم مبنای ۱۰ (l) و طبیعی (n)." },
+          { btn: "(, )", key: "(, )", desc: "پرانتز باز و بسته." },
+          { btn: "π, e", key: "p, e", desc: "وارد کردن ثابتهای پی و اویلر." },
+          { btn: "Ans", key: "a", desc: "فراخوانی آخرین پاسخ." },
+          { btn: "MODE", key: "m", desc: "تغییر حالت بین درجه (DEG) و رادیان (RAD)." }
+        ]
+      }
+    };
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.getElementById('lblSettings').innerText = t.settings;
+      document.getElementById('lblInstructions').innerText = t.help;
+      document.getElementById('hdrSettings').innerText = t.settings;
+      document.getElementById('lblLanguage').innerText = t.language;
+      document.getElementById('lblTheme').innerText = t.theme;
+      document.getElementById('lblAccent').innerText = t.accent;
+      document.getElementById('hdrInstructions').innerText = t.hdrInstructions;
+      document.getElementById('secSys').innerText = t.sysTitle;
+      document.getElementById('secSci').innerText = t.sciTitle;
+      document.getElementById('secNum').innerText = t.numTitle;
+
+      let html = "";
+      t.instructions.forEach(item => {
+        html += `<div class="instruction-item">
+          <strong>${item.btn}</strong> [Key: <code>${item.key}</code>]: ${item.desc}
+        </div>`;
+      });
+      document.getElementById('instructionsContent').innerHTML = html;
+    }
+
+    function togglePanel(panelId) {
+      const p = document.getElementById(panelId);
+      const isOpen = p.classList.contains('open');
+      document.querySelectorAll('.panel').forEach(el => el.classList.remove('open'));
+      if (!isOpen) p.classList.add('open');
+    }
 
     function toggleTheme() {
       const html = document.documentElement;
@@ -330,6 +551,37 @@
         expr = "";
       }
     }
+
+    // Full Keyboard Listener Mapping
+    window.addEventListener('keydown', function(e) {
+      if (e.key >= '0' && e.key <= '9') insertNum(e.key);
+      else if (e.key === '.') insertNum('.');
+      else if (e.key === '+') insertOp('+');
+      else if (e.key === '-') insertOp('-');
+      else if (e.key === '*') insertOp('*');
+      else if (e.key === '/') { e.preventDefault(); insertOp('/'); }
+      else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); evaluateDirect(); }
+      else if (e.key === 'Backspace') { e.preventDefault(); deleteChar(); }
+      else if (e.key === 'Escape') clearAll();
+      else if (e.key === '(') insertFunc('(');
+      else if (e.key === ')') insertFunc(')');
+      else if (e.key === '^') insertFunc('^');
+      else if (e.key === 's') insertFunc('sin(');
+      else if (e.key === 'c') insertFunc('cos(');
+      else if (e.key === 't') insertFunc('tan(');
+      else if (e.key === 'l') insertFunc('log(');
+      else if (e.key === 'n') insertFunc('ln(');
+      else if (e.key === 'r') insertFunc('√(');
+      else if (e.key === 'q') insertFunc('^2');
+      else if (e.key === 'p') insertFunc('π');
+      else if (e.key === 'e') insertFunc('e');
+      else if (e.key === 'a') insertFunc('Ans');
+      else if (e.key === 'm') toggleDeg();
+      else if (e.key === 'Shift') toggleShift();
+    });
+
+    // Initialize English Language & Instructions Panel
+    changeLanguage('en');
   </script>
 </body>
 </html>
