@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-color="blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimalist Calculator</title>
+  <style>
+    :root {
+      --bg: #191919;
+      --card-bg: #252525;
+      --btn-bg: #333333;
+      --text: #ffffff;
+      --border: #383838;
+      
+      --color-red: #ff4d4d;
+      --color-orange: #ff944d;
+      --color-yellow: #ffd11a;
+      --color-green: #2ecc71;
+      --color-blue: #3498db;
+      --color-purple: #9b59b6;
+      --color-pink: #ff66a3;
+      --accent: var(--color-blue);
+    }
+
+    [data-theme="light"] {
+      --bg: #f7f7f9;
+      --card-bg: #ffffff;
+      --btn-bg: #f0f0f3;
+      --text: #191919;
+      --border: #e0e0e0;
+    }
+
+    [data-color="red"] { --accent: var(--color-red); }
+    [data-color="orange"] { --accent: var(--color-orange); }
+    [data-color="yellow"] { --accent: var(--color-yellow); }
+    [data-color="green"] { --accent: var(--color-green); }
+    [data-color="blue"] { --accent: var(--color-blue); }
+    [data-color="purple"] { --accent: var(--color-purple); }
+    [data-color="pink"] { --accent: var(--color-pink); }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; transition: all 0.3s ease; }
+    
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    select, button { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+    
+    .palette { display: flex; gap: 4px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+    .dot.red { background: var(--color-red); }
+    .dot.orange { background: var(--color-orange); }
+    .dot.yellow { background: var(--color-yellow); }
+    .dot.green { background: var(--color-green); }
+    .dot.blue { background: var(--color-blue); }
+    .dot.purple { background: var(--color-purple); }
+    .dot.pink { background: var(--color-pink); }
+
+    .calc-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; width: 100%; max-width: 260px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    
+    .display { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: right; margin-bottom: 12px; overflow-x: auto; }
+    .history { font-size: 11px; opacity: 0.6; min-height: 14px; }
+    .current { font-size: 24px; font-weight: bold; }
+
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .grid button { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; transition: all 0.1s ease; }
+    .grid button:hover { border-color: var(--accent); }
+    .grid button.op { color: var(--accent); }
+    .grid button.action { background: var(--accent); color: white; border: none; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <select id="langSelect" onchange="changeLang(this.value)">
+      <option value="en">EN</option>
+      <option value="es">ES</option>
+      <option value="fr">FR</option>
+    </select>
+    <button onclick="toggleTheme()">☀️ / 🌙</button>
+    <div class="palette">
+      <div class="dot red" onclick="setColor('red')"></div>
+      <div class="dot orange" onclick="setColor('orange')"></div>
+      <div class="dot yellow" onclick="setColor('yellow')"></div>
+      <div class="dot green" onclick="setColor('green')"></div>
+      <div class="dot blue" onclick="setColor('blue')"></div>
+      <div class="dot purple" onclick="setColor('purple')"></div>
+      <div class="dot pink" onclick="setColor('pink')"></div>
+    </div>
+  </div>
+
+  <div class="calc-card">
+    <div class="display">
+      <div class="history" id="historyText"></div>
+      <div class="current" id="displayText">0</div>
+    </div>
+    
+    <div class="grid">
+      <button onclick="clearCalc()" id="clearBtn">C</button>
+      <button onclick="deleteDigit()" id="delBtn">DEL</button>
+      <button class="op" onclick="appendOp('%')">%</button>
+      <button class="op" onclick="appendOp('÷')">÷</button>
+
+      <button onclick="appendNum('7')">7</button>
+      <button onclick="appendNum('8')">8</button>
+      <button onclick="appendNum('9')">9</button>
+      <button class="op" onclick="appendOp('×')">×</button>
+
+      <button onclick="appendNum('4')">4</button>
+      <button onclick="appendNum('5')">5</button>
+      <button onclick="appendNum('6')">6</button>
+      <button class="op" onclick="appendOp('-')">-</button>
+
+      <button onclick="appendNum('1')">1</button>
+      <button onclick="appendNum('2')">2</button>
+      <button onclick="appendNum('3')">3</button>
+      <button class="op" onclick="appendOp('+')">+</button>
+
+      <button onclick="appendNum('0')" style="grid-column: span 2;">0</button>
+      <button onclick="appendNum('.')">.</button>
+      <button class="action" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let currentInput = "0";
+    let previousInput = "";
+    let operator = null;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function setColor(color) {
+      document.documentElement.setAttribute('data-color', color);
+    }
+
+    function changeLang(lang) {
+      const delLabel = { en: "DEL", es: "BOR", fr: "EFF" };
+      document.getElementById('delBtn').innerText = delLabel[lang];
+    }
+
+    function updateDisplay() {
+      document.getElementById('displayText').innerText = currentInput;
+      document.getElementById('historyText').innerText = previousInput + (operator ? " " + operator : "");
+    }
+
+    function appendNum(num) {
+      if (currentInput === "0" && num !== ".") currentInput = num;
+      else if (num === "." && currentInput.includes(".")) return;
+      else currentInput += num;
+      updateDisplay();
+    }
+
+    function appendOp(op) {
+      if (operator && currentInput !== "") calculate();
+      previousInput = currentInput;
+      operator = op;
+      currentInput = "";
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!operator || currentInput === "") return;
+      let prev = parseFloat(previousInput);
+      let curr = parseFloat(currentInput);
+      let result = 0;
+
+      switch(operator) {
+        case '+': result = prev + curr; break;
+        case '-': result = prev - curr; break;
+        case '×': result = prev * curr; break;
+        case '÷': result = curr !== 0 ? prev / curr : "Error"; break;
+        case '%': result = prev % curr; break;
+      }
+
+      currentInput = result.toString();
+      previousInput = "";
+      operator = null;
+      updateDisplay();
+    }
+
+    function clearCalc() {
+      currentInput = "0";
+      previousInput = "";
+      operator = null;
+      updateDisplay();
+    }
+
+    function deleteDigit() {
+      if (currentInput.length > 1) {
+        currentInput = currentInput.slice(0, -1);
+      } else {
+        currentInput = "0";
+      }
+      updateDisplay();
+    }
+  </script>
+</body>
+</html>
